@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market news — Real-Time Article Scraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Live RSS + article text</p>
+      <h1 class="title">Market news scraper</h1>
+      <p class="lede">
+        Pull Google News for your country and sector, rank by relevance, and open originals with short summaries.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <form id="searchForm" class="form-grid">
+        <div class="field span-2">
+          <label for="country">Country</label>
+          <select id="country">
+            {% for c in country_options %}
+              <option value="{{ c }}">{{ "No country filter" if c == "any" else country_labels.get(c, c.title()) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="language_mode">News language</label>
+          <select id="language_mode" required>
+            {% for mode in language_modes %}
+              <option value="{{ mode }}">{{ language_labels.get(mode, mode.title()) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="index">Sector / index</label>
+          <select id="index">
+            {% for idx in index_options %}
+              <option value="{{ idx }}">{{ "No sector filter" if idx == "any" else idx.title() }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="region">Region</label>
+          <select id="region">
+            <option value="">All regions</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="city">City</label>
+          <select id="city">
+            <option value="">All cities</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="trend">Trend</label>
+          <select id="trend">
+            {% for t in trends %}
+              <option value="{{ t }}">{{ trend_labels.get(t, t.title()) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="duration">Time window</label>
+          <select id="duration">
+            {% for d in duration_options %}
+              <option value="{{ d }}">{{ "No time filter" if d == "any" else d.title() }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="max_results">Articles to return</label>
+          <select id="max_results" name="max_results">
+            {% for n in max_results_options %}
+              <option value="{{ n }}" {% if n == 28 %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="keywords">Must include <span class="optional">keywords</span></label>
+          <input type="text" id="keywords" name="keywords" placeholder="e.g. inflation, dairy, merger" autocomplete="off">
+        </div>
+
+        <div class="field span-2">
+          <label for="exclude">Exclude topics <span class="optional">comma-separated</span></label>
+          <input type="text" id="exclude" name="exclude" placeholder="e.g. cricket, bollywood, celebrity" autocomplete="off">
+        </div>
+
+        <div class="field span-2 strict-row">
+          <label class="checkbox">
+            <input type="checkbox" id="strict" name="strict">
+            <span>Stricter matching</span>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" id="broaden" name="broaden">
+            <span>Broader pool</span>
+          </label>
+          <p class="hint">Stricter = stronger sector + score bar. Broader = more candidates (still geo-filtered), useful when you want more articles.</p>
+        </div>
+
+        <div class="field span-2 actions">
+          <button type="submit" id="submitBtn" class="btn-primary">
+            <span class="btn-label">Fetch articles</span>
+            <span class="btn-spinner" hidden aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section id="status" class="status" role="status" aria-live="polite"></section>
+    <section id="results" class="results" aria-label="Article results"></section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Pick <strong>Any / no trend</strong> for sector-only news. Use language, region, and city filters to target local coverage.</p>
+  </footer>
+
+  <script id="regionCityFilters" type="application/json">{{ region_city_filters | tojson }}</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
